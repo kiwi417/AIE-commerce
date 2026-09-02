@@ -36,7 +36,7 @@ if defined JAVA_HOME set "JAVA_BIN=%JAVA_HOME%\bin\java.exe"
 start "ruoyi-backend" cmd /k "cd /d %~dp0 && %JAVA_BIN% -jar ruoyi-admin\target\ruoyi-admin.jar"
 
 choice /C YN /T 8 /D N /M "Start AI service (8082) too? [Y,N]"
-if errorlevel 1 if not errorlevel 2 start "ruoyi-ai" cmd /k "cd /d D:\ai-service && .venv\Scripts\python.exe -m app.main"
+if errorlevel 1 if not errorlevel 2 start "ruoyi-ai" cmd /k "cd /d %~dp0ai-service && "%~dp0ai-service\.venv\Scripts\python.exe" -m app.main"
 
 echo [5/5] Start frontend (80) in new window...
 start "ruoyi-frontend" cmd /k "cd /d %~dp0ruoyi-ui && npm run dev"

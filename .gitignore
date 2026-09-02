@@ -19,6 +19,8 @@ __pycache__/
 *.pyc
 ai-service/.venv/
 ai-service/data/
+ai-service/*_login.json
+ai-service/acc_*
 
 # ===== Secrets & local config (never commit) =====
 .env

@@ -1,0 +1,41 @@
+{
+  "name": "AI客服评估集 v1（基于实测基线 acc_result.txt 构建）",
+  "description": "每条用例给出规则化判分条件：must_contain 答案必须包含 / must_not_contain 禁止出现 / must_match 必须命中正则 / must_product 商品卡片必须召回 / must_not_product 禁止召回 / products_empty 预期不召回商品 / ungrounded_policy 政策类无文档锚定的已知短板",
+  "cases": [
+    {
+      "id": "price-cheapest",
+      "question": "你们店里最便宜的饮料是什么？多少钱？",
+      "must_contain": ["农夫山泉"],
+      "must_match": ["2元|¥2|2块"],
+      "must_product": "农夫山泉"
+    },
+    {
+      "id": "no-phone",
+      "question": "你们有卖苹果手机吗？",
+      "must_contain": ["没有"],
+      "must_not_match": ["苹果手机[^。]{0,15}[0-9]+元"],
+      "must_not_product": "苹果手机"
+    },
+    {
+      "id": "price-m185",
+      "question": "罗技M185无线鼠标多少钱？",
+      "must_contain": ["90件"],
+      "must_match": ["[¥¥]?\\s*59(\\.0)?"],
+      "must_product": "罗技M185"
+    },
+    {
+      "id": "policy",
+      "question": "支持7天无理由退货吗？",
+      "must_contain": ["退货"],
+      "products_empty": true,
+      "ungrounded_policy": true
+    },
+    {
+      "id": "powerbank",
+      "question": "想买个充电宝，有什么推荐？",
+      "must_contain": ["小米充电宝"],
+      "must_match": ["79(\\.0)?"],
+      "must_product": "小米充电宝"
+    }
+  ]
+}
