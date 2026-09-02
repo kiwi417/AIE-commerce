@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.mall.mapper.AiChatLogMapper">
+
+    <resultMap type="AiChatLog" id="AiChatLogResult">
+        <id     property="id"         column="log_id"      />
+        <result property="sessionId"  column="session_id"  />
+        <result property="question"   column="question"    />
+        <result property="answer"     column="answer"      />
+        <result property="intent"     column="intent"      />
+        <result property="agent"      column="agent"       />
+        <result property="latencyMs"  column="latency_ms"  />
+        <result property="createBy"   column="create_by"   />
+        <result property="createTime" column="create_time" />
+    </resultMap>
+
+    <sql id="selectAiChatLogVo">
+        select log_id, session_id, question, answer, intent, agent, latency_ms, create_by, create_time from ai_chat_log
+    </sql>
+
+    <select id="selectAiChatLogList" parameterType="AiChatLog" resultMap="AiChatLogResult">
+        <include refid="selectAiChatLogVo"/>
+        <where>
+            <if test="intent != null  and intent != ''"> and intent = #{intent}</if>
+            <if test="agent != null  and agent != ''"> and agent = #{agent}</if>
+        </where>
+        order by log_id desc
+    </select>
+
+    <select id="selectAiChatLogById" parameterType="Long" resultMap="AiChatLogResult">
+        <include refid="selectAiChatLogVo"/>
+        where log_id = #{id}
+    </select>
+
+    <insert id="insertAiChatLog" parameterType="AiChatLog" useGeneratedKeys="true" keyProperty="id">
+        insert into ai_chat_log
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="sessionId != null and sessionId != ''">session_id,</if>
+            <if test="question != null and question != ''">question,</if>
+            <if test="answer != null and answer != ''">answer,</if>
+            <if test="intent != null and intent != ''">intent,</if>
+            <if test="agent != null and agent != ''">agent,</if>
+            <if test="latencyMs != null">latency_ms,</if>
+            <if test="createBy != null and createBy != ''">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="sessionId != null and sessionId != ''">#{sessionId},</if>
+            <if test="question != null and question != ''">#{question},</if>
+            <if test="answer != null and answer != ''">#{answer},</if>
+            <if test="intent != null and intent != ''">#{intent},</if>
+            <if test="agent != null and agent != ''">#{agent},</if>
+            <if test="latencyMs != null">#{latencyMs},</if>
+            <if test="createBy != null and createBy != ''">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+        </trim>
+    </insert>
+
+    <delete id="deleteAiChatLogByIds" parameterType="Long">
+        delete from ai_chat_log where log_id in
+        <foreach collection="array" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>

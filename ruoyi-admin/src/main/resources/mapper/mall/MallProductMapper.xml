@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.mall.mapper.MallProductMapper">
+
+    <resultMap type="MallProduct" id="MallProductResult">
+        <result property="productId"    column="product_id"   />
+        <result property="categoryId"   column="category_id"  />
+        <result property="categoryName" column="category_name"/>
+        <result property="productName"  column="product_name" />
+        <result property="price"        column="price"        />
+        <result property="stock"        column="stock"        />
+        <result property="unit"         column="unit"         />
+        <result property="barcode"      column="barcode"      />
+        <result property="shelfArea"    column="shelf_area"   />
+        <result property="description"  column="description"  />
+        <result property="tags"         column="tags"         />
+        <result property="imageUrl"     column="image_url"    />
+        <result property="status"       column="status"       />
+        <result property="createBy"     column="create_by"    />
+        <result property="createTime"   column="create_time"  />
+        <result property="updateBy"     column="update_by"    />
+        <result property="updateTime"   column="update_time"  />
+        <result property="remark"       column="remark"       />
+    </resultMap>
+
+    <sql id="selectMallProductVo">
+        select p.product_id, p.category_id, c.category_name, p.product_name, p.price, p.stock,
+               p.unit, p.barcode, p.shelf_area, p.description, p.tags, p.image_url, p.status,
+               p.create_by, p.create_time, p.update_by, p.update_time, p.remark
+        from mall_product p
+        left join mall_category c on p.category_id = c.category_id
+    </sql>
+
+    <select id="selectMallProductList" parameterType="MallProduct" resultMap="MallProductResult">
+        <include refid="selectMallProductVo"/>
+        <where>
+            <if test="status != null and status != ''">
+                AND p.status = #{status}
+            </if>
+            <if test="categoryId != null">
+                AND p.category_id = #{categoryId}
+            </if>
+            <if test="productName != null and productName != ''">
+                AND p.product_name like concat('%', #{productName}, '%')
+            </if>
+        </where>
+        order by p.product_id asc
+    </select>
+
+    <select id="selectMallProductById" parameterType="Long" resultMap="MallProductResult">
+        <include refid="selectMallProductVo"/>
+        where p.product_id = #{productId}
+    </select>
+
+    <insert id="insertMallProduct" parameterType="MallProduct" useGeneratedKeys="true" keyProperty="productId">
+        insert into mall_product (
+            category_id, product_name, price, stock, unit, barcode, shelf_area,
+            description, tags, image_url, status, create_by, create_time, remark
+        ) values (
+            #{categoryId}, #{productName}, #{price}, #{stock}, #{unit}, #{barcode}, #{shelfArea},
+            #{description}, #{tags}, #{imageUrl}, #{status}, #{createBy}, sysdate(), #{remark}
+        )
+    </insert>
+
+    <update id="updateMallProduct" parameterType="MallProduct">
+        update mall_product
+        <set>
+            <if test="categoryId != null">category_id = #{categoryId},</if>
+            <if test="productName != null and productName != ''">product_name = #{productName},</if>
+            <if test="price != null">price = #{price},</if>
+            <if test="stock != null">stock = #{stock},</if>
+            <if test="unit != null">unit = #{unit},</if>
+            <if test="barcode != null">barcode = #{barcode},</if>
+            <if test="shelfArea != null">shelf_area = #{shelfArea},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="tags != null">tags = #{tags},</if>
+            <if test="imageUrl != null">image_url = #{imageUrl},</if>
+            <if test="status != null and status != ''">status = #{status},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            update_time = sysdate()
+        </set>
+        where product_id = #{productId}
+    </update>
+
+    <delete id="deleteMallProductByIds" parameterType="Long">
+        delete from mall_product where product_id in
+        <foreach collection="array" item="productId" open="(" separator="," close=")">
+            #{productId}
+        </foreach>
+    </delete>
+
+    <select id="selectMallProductCountByCategoryId" parameterType="Long" resultType="int">
+        select count(1) from mall_product where category_id = #{categoryId}
+    </select>
+
+</mapper>
