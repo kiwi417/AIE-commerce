@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.mall.mapper.PortalOrderMapper">
+
+    <resultMap type="PortalOrder" id="PortalOrderResult">
+        <result property="orderId"       column="order_id"      />
+        <result property="orderNo"       column="order_no"      />
+        <result property="sessionId"     column="session_id"    />
+        <result property="customerPhone" column="customer_phone"/>
+        <result property="customerName"  column="customer_name" />
+        <result property="totalAmount"   column="total_amount"  />
+        <result property="itemCount"     column="item_count"    />
+        <result property="status"        column="status"        />
+        <result property="createBy"      column="create_by"     />
+        <result property="createTime"    column="create_time"   />
+        <result property="updateBy"      column="update_by"     />
+        <result property="updateTime"    column="update_time"   />
+        <result property="remark"        column="remark"        />
+    </resultMap>
+
+    <resultMap type="PortalOrderItem" id="PortalOrderItemResult">
+        <result property="itemId"      column="item_id"     />
+        <result property="orderNo"     column="order_no"    />
+        <result property="productId"   column="product_id"  />
+        <result property="productName" column="product_name"/>
+        <result property="price"       column="price"       />
+        <result property="quantity"    column="quantity"    />
+        <result property="subtotal"    column="subtotal"    />
+        <result property="shelfArea"   column="shelf_area"  />
+        <result property="unit"        column="unit"        />
+    </resultMap>
+
+    <sql id="selectPortalOrderVo">
+        select order_id, order_no, session_id, customer_phone, customer_name,
+               total_amount, item_count, status,
+               create_by, create_time, update_by, update_time, remark
+        from mall_order
+    </sql>
+
+    <insert id="insertPortalOrder" parameterType="PortalOrder" useGeneratedKeys="true" keyProperty="orderId">
+        insert into mall_order (
+            order_no, session_id, customer_phone, customer_name,
+            total_amount, item_count, status, create_by, create_time, remark
+        ) values (
+            #{orderNo}, #{sessionId}, #{customerPhone}, #{customerName},
+            #{totalAmount}, #{itemCount}, #{status}, #{createBy}, sysdate(), #{remark}
+        )
+    </insert>
+
+    <insert id="insertPortalOrderItems" parameterType="java.util.List">
+        insert into mall_order_item (
+            order_no, product_id, product_name, price, quantity, subtotal, shelf_area, unit
+        ) values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.orderNo}, #{item.productId}, #{item.productName},
+             #{item.price}, #{item.quantity}, #{item.subtotal}, #{item.shelfArea}, #{item.unit})
+        </foreach>
+    </insert>
+
+    <select id="selectPortalOrderByOrderNo" parameterType="String" resultMap="PortalOrderResult">
+        <include refid="selectPortalOrderVo"/>
+        where order_no = #{orderNo}
+    </select>
+
+    <select id="selectPortalOrderItemsByOrderNo" parameterType="String" resultMap="PortalOrderItemResult">
+        select item_id, order_no, product_id, product_name, price, quantity, subtotal, shelf_area, unit
+        from mall_order_item
+        where order_no = #{orderNo}
+        order by item_id asc
+    </select>
+
+    <select id="selectPortalOrderList" parameterType="PortalOrder" resultMap="PortalOrderResult">
+        <include refid="selectPortalOrderVo"/>
+        <where>
+            <if test="customerPhone != null and customerPhone != ''">
+                AND customer_phone = #{customerPhone}
+            </if>
+            <if test="orderNo != null and orderNo != ''">
+                AND order_no = #{orderNo}
+            </if>
+        </where>
+        order by create_time desc, order_id desc
+    </select>
+
+    <select id="selectOrderList" parameterType="OrderQueryParam" resultMap="PortalOrderResult">
+        <include refid="selectPortalOrderVo"/>
+        <where>
+            <if test="orderNo != null and orderNo != ''">
+                AND order_no like concat('%', #{orderNo}, '%')
+            </if>
+            <if test="customerPhone != null and customerPhone != ''">
+                AND customer_phone = #{customerPhone}
+            </if>
+            <if test="status != null and status != ''">
+                AND status = #{status}
+            </if>
+        </where>
+        order by create_time desc, order_id desc
+    </select>
+
+    <select id="selectOrderById" parameterType="Long" resultMap="PortalOrderResult">
+        <include refid="selectPortalOrderVo"/>
+        where order_id = #{orderId}
+    </select>
+
+    <update id="updateOrderStatus">
+        update mall_order set status = #{status}, update_time = sysdate()
+        where order_id = #{orderId}
+    </update>
+
+    <update id="deductStock">
+        update mall_product set stock = stock - #{quantity}
+        where product_id = #{productId} and stock >= #{quantity}
+    </update>
+
+    <update id="restoreStock">
+        update mall_product set stock = stock + #{quantity}
+        where product_id = #{productId}
+    </update>
+
+</mapper>

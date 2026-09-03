@@ -111,7 +111,9 @@ class ProductKB:
             categories = {}
             if os.path.exists(cats_path):
                 with open(cats_path, encoding="utf-8") as f:
-                    categories = json.load(f)
+                    # json 键只能是字符串，须转回 int，与 build() 的 int 键一致
+                    # （否则重建完成前 cats.get(categoryId) 永远 miss，分类名显示为空）
+                    categories = {int(k): v for k, v in json.load(f).items()}
             store = load_vector_store(self._settings.vector_backend, EMBED_DIM, self._kb_dir)
             if store is None or store.count() == 0 or len(store.ids) != len(products):
                 log.warning("落盘知识库不完整，等待后台重建")

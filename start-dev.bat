@@ -35,7 +35,10 @@ set "JAVA_BIN=java"
 if defined JAVA_HOME set "JAVA_BIN=%JAVA_HOME%\bin\java.exe"
 start "ruoyi-backend" cmd /k "cd /d %~dp0 && %JAVA_BIN% -jar ruoyi-admin\target\ruoyi-admin.jar"
 
-choice /C YN /T 8 /D N /M "Start AI service (8082) too? [Y,N]"
+echo     Waiting for backend 8080 to be ready (Spring cold start takes a while)...
+powershell -NoProfile -Command "$t=0; while($t -lt 120){ if(Get-NetTCPConnection -LocalPort 8080 -State Listen -ErrorAction SilentlyContinue){ Write-Host '    backend 8080 ready'; exit 0 }; Start-Sleep 2; $t+=2 }; Write-Host '    !!! backend 8080 not ready after 120s, continuing anyway'"
+
+choice /C YN /T 4 /D N /M "Start AI service (8082) too? [Y,N]"
 if errorlevel 1 if not errorlevel 2 start "ruoyi-ai" cmd /k "cd /d %~dp0ai-service && "%~dp0ai-service\.venv\Scripts\python.exe" -m app.main"
 
 echo [5/5] Start frontend (80) in new window...

@@ -25,10 +25,34 @@ export default defineConfig(({ mode, command }) => {
       // https://cn.vitejs.dev/config/#resolve-extensions
       extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json', '.vue']
     },
+    // 依赖预构建：提前声明动态 import 才会用到的重依赖，
+    // 避免打开页面时 vite 才发现新依赖 → 触发 optimize + 整页 reload（启动慢的主因之一）
+    optimizeDeps: {
+      include: [
+        'element-plus',
+        '@element-plus/icons-vue',
+        'echarts',
+        '@vueup/vue-quill',
+        'vue-cropper',
+        'vuedraggable',
+        'jsencrypt',
+        '@vueuse/core',
+        'axios',
+        'pinia',
+        'vue-router',
+        'js-cookie',
+        'nprogress',
+        'file-saver',
+        'fuse.js',
+        'clipboard',
+        'js-beautify'
+      ]
+    },
     // 打包配置
     build: {
       // https://vite.dev/config/build-options.html
-      sourcemap: command === 'build' ? false : 'inline',
+      // dev 内联 sourcemap 会让每个模块体积膨胀 30%+，拖慢页面加载；调试确需源码映射时改回 'inline'
+      sourcemap: false,
       outDir: 'dist',
       assetsDir: 'assets',
       chunkSizeWarningLimit: 2000,
@@ -45,6 +69,10 @@ export default defineConfig(({ mode, command }) => {
       port: 80,
       host: true,
       open: true,
+      // 服务就绪前预转换入口及其依赖，浏览器首屏无需等待按需转换
+      warmup: {
+        clientFiles: ['./src/main.js']
+      },
       proxy: {
         // https://cn.vitejs.dev/config/#server-proxy
         '/dev-api': {
